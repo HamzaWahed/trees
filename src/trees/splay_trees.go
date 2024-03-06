@@ -8,9 +8,9 @@ type SplayTree struct {
 	RightChild *SplayTree
 }
 
-// New_splay_tree Initializes a new splay tree node and returns a pointer to it.
+// NewSplayTree Initializes a new splay tree node and returns a pointer to it.
 // Runtime: O(1)
-func New_splay_tree(x int32) *SplayTree {
+func NewSplayTree(x int32) *SplayTree {
 	tree := new(SplayTree)
 	tree.Data = x
 	tree.LeftChild = nil
@@ -55,9 +55,9 @@ func (tree *SplayTree) Insert(x int32) bool {
 
 	parent := tree.Search(x)
 	if parent.Data < x {
-		parent.RightChild = New_splay_tree(x)
+		parent.RightChild = NewSplayTree(x)
 	} else if parent.Data > x {
-		parent.LeftChild = New_splay_tree(x)
+		parent.LeftChild = NewSplayTree(x)
 	}
 
 	// splay the node to the root of the tree
@@ -99,7 +99,8 @@ func (tree *SplayTree) maxNode() *SplayTree {
 	return nil
 }
 
-// Delete Deletes the node with x in the splay tree. If there is no node with the item x, then returns false.
+// Delete Deletes the node with x in the splay tree. If the node had a parent, then the parent is splayed to the .
+// root of the tree.
 // Runtime:
 func (tree *SplayTree) Delete(x int32) (int32, string) {
 	nodeToDelete := tree.Search(x)
