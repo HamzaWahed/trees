@@ -26,6 +26,7 @@ func (tree *SplayTree) Search(x int32) *SplayTree {
 		return tree
 	}
 
+	//TODO: Splay accessed node to the root of the tree
 	if tree.LeftChild == nil && tree.RightChild == nil {
 		return tree
 	}
@@ -60,11 +61,13 @@ func (tree *SplayTree) Insert(x int32) bool {
 		parent.LeftChild = NewSplayTree(x)
 	}
 
-	// splay the node to the root of the tree
+	//TODO: splay the node to the root of the tree
 	//node.splay()
 	return true
 }
 
+// Not sure if finding parent like this is efficient, or we should be maintaining extra pointers for the data
+// structure
 func (tree *SplayTree) findParent(x int32) *SplayTree {
 	if tree == nil {
 		return nil
@@ -95,8 +98,18 @@ func (tree *SplayTree) findParent(x int32) *SplayTree {
 	return nil
 }
 
+// maxNode finds the max node in a subtree
+// Runtime: O(lg n) worst case
 func (tree *SplayTree) maxNode() *SplayTree {
-	return nil
+	if tree == nil {
+		return nil
+	}
+
+	if tree.RightChild == nil {
+		return tree
+	}
+
+	return tree.RightChild.maxNode()
 }
 
 // Delete Deletes the node with x in the splay tree. If the node had a parent, then the parent is splayed to the .
@@ -130,7 +143,7 @@ func (tree *SplayTree) Delete(x int32) (int32, string) {
 		parent.RightChild = nil
 	}
 
-	// find the max element in the left subtree and splay it to the top of that tree
+	//TODO: find the max element in the left subtree and splay it to the top of that tree
 	maxNodeLeftSubtree := leftSubtree.maxNode()
 	maxNodeLeftSubtree.splay()
 
