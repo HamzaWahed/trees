@@ -1,8 +1,7 @@
-# Multi-Splay and Tango Trees in Rust
+# Multi-Splay and Tango Trees in Go
 
 Goal is to do competitive analysis and benchmarks of:
-1. Binary Search Trees
-2. Red Black Trees
-3. Splay Trees
-4. Multi-Splay Trees
-5. Tango Trees
+1. Red Black Trees
+2. Splay Trees
+3. Multi-Splay Trees
+4. Tango Trees
