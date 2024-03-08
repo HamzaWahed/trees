@@ -149,25 +149,48 @@ func (tree *SplayTree) splay(node *Node) {
 
 	// zig step: If y is the root, do one rotation on x to make it the root
 	if z == nil {
-		if y.LeftChild == node {
-			y.LeftChild = node.RightChild
-			node.RightChild = y
-		} else {
-			y.RightChild = node.LeftChild
-			node.LeftChild = y
-		}
-
+		rotate(node, y)
 		tree.Root = node
 		return
 	}
 
-	// zig-zig step
-	//if z.RightChild == y && y.RightChild == tree {
-	//
-	//}
+	// zig-zig step: first rotate y and then rotate x
+	if (z.RightChild == y && y.RightChild == node) || (z.LeftChild == y && y.LeftChild == node) {
+		//TODO: Have to update parent pointers of z if z is not nil
+		rotate(y, z)
+		rotate(node, y)
+	} else { // zig-zag step: double rotate x
+		leftSubtree := node.LeftChild
+		rightSubtree := node.RightChild
+		if node.Data < z.Data {
+			node.LeftChild = z.LeftChild
+			z.LeftChild = rightSubtree
+			node.RightChild = z
+			y.RightChild = leftSubtree
+		} else {
+			node.RightChild = z.RightChild
+			z.RightChild = leftSubtree
+			node.LeftChild = z
+			y.LeftChild = rightSubtree
+		}
+	}
 
-	// zig-zag step
-	return
+	// recurse if z is not the root of the tree, until node is the root
+	if tree.Root != z {
+		tree.splay(node)
+	}
+
+	tree.Root = node
+}
+
+func rotate(x *Node, y *Node) {
+	if y.LeftChild == x {
+		y.LeftChild = x.RightChild
+		x.RightChild = y
+	} else {
+		y.RightChild = x.LeftChild
+		x.LeftChild = y
+	}
 }
 
 func (tree *SplayTree) PrintTree() {
@@ -179,7 +202,7 @@ func printTreeHelper(node *Node) {
 		return
 	}
 
-	fmt.Println(node.Data)
+	fmt.Printf("%d ", node.Data)
 	printTreeHelper(node.LeftChild)
 	printTreeHelper(node.RightChild)
 }
