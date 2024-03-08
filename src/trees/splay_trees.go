@@ -1,96 +1,138 @@
 package trees
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type SplayTree struct {
+type Node struct {
 	Data       int32
-	LeftChild  *SplayTree
-	RightChild *SplayTree
+	LeftChild  *Node
+	RightChild *Node
 }
 
+type SplayTree struct {
+	Root *Node
+	Size int32
+}
+
+const NullPointerError string = "Cannot call search on a null splay tree pointer"
+const MemoryAllocationError string = "Could not allocate memory"
+
 // NewSplayTree Initializes a new splay tree node and returns a pointer to it.
-// Runtime: O(1)
 func NewSplayTree(x int32) *SplayTree {
 	tree := new(SplayTree)
-	tree.Data = x
-	tree.LeftChild = nil
-	tree.RightChild = nil
+	if tree == nil {
+		panic(MemoryAllocationError)
+	}
+
+	tree.Root = new(Node)
+	if tree.Root == nil {
+		panic(MemoryAllocationError)
+	}
+
+	tree.Size = 0
+	tree.Root.Data = x
+	tree.Root.LeftChild = nil
+	tree.Root.RightChild = nil
 	return tree
 }
 
-// Search Binary searches the splay tree for a node with x in its data field and return true if such a node exists. Splays the
-// node to the top if it exists, otherwise splays the node where the search stops on.
-// Runtime: O(lg n) amortized
-func (tree *SplayTree) Search(x int32) *SplayTree {
-	if tree.Data == x {
-		return tree
+// Search Binary searches the splay tree for a node with x in its data field. Returns a pointer to the node or to the parent node
+// if the x is not in the splay tree. Splays the node to the top if it exists, otherwise splays the node where the search stops on.
+func (tree *SplayTree) Search(x int32) bool {
+	if tree == nil {
+		panic(NullPointerError)
 	}
 
-	//TODO: Splay accessed node to the root of the tree
-	if tree.LeftChild == nil && tree.RightChild == nil {
-		return tree
+	node := searchHelper(x, tree.Root)
+	tree.splay(node)
+	if node.Data == x {
+		return true
 	}
 
-	if tree.Data < x {
-		if tree.RightChild == nil {
-			return tree
+	return false
+}
+
+func searchHelper(x int32, node *Node) *Node {
+	if node.Data == x {
+		return node
+	}
+
+	if node.LeftChild == nil && node.RightChild == nil {
+		return node
+	}
+
+	if node.Data < x {
+		if node.RightChild == nil {
+			return node
 		}
 
-		return tree.RightChild.Search(x)
+		return searchHelper(x, node.RightChild)
 	} else {
-		if tree.LeftChild == nil {
-			return tree
+		if node.LeftChild == nil {
+			return node
 		}
 
-		return tree.LeftChild.Search(x)
+		return searchHelper(x, node.LeftChild)
 	}
 }
 
 // Insert Creates a new splay tree node with x and inserts the node into the tree. Splays the node to the root of
 // the tree after insertion.
-// Runtime:
 func (tree *SplayTree) Insert(x int32) bool {
 	if tree == nil {
-		return false
+		panic(NullPointerError)
 	}
 
-	parent := tree.Search(x)
-	if parent.Data < x {
-		parent.RightChild = NewSplayTree(x)
-	} else if parent.Data > x {
-		parent.LeftChild = NewSplayTree(x)
+	node := new(Node)
+	if node == nil {
+		panic(MemoryAllocationError)
 	}
 
-	//TODO: splay the node to the root of the tree
-	//node.splay()
+	node.Data = x
+	insertHelper(tree.Root, node)
 	return true
 }
 
-// Not sure if finding parent like this is efficient, or we should be maintaining extra pointers for the data
-// structure
-func (tree *SplayTree) findParent(x int32) *SplayTree {
-	if tree == nil {
+func insertHelper(root *Node, node *Node) {
+	if root.Data > node.Data {
+		if root.LeftChild == nil {
+			root.LeftChild = node
+		} else {
+			insertHelper(root.LeftChild, node)
+		}
+	} else {
+		if root.RightChild == nil {
+			root.RightChild = node
+		} else {
+			insertHelper(root.RightChild, node)
+		}
+	}
+}
+
+func findParent(x int32, node *Node) *Node {
+	if node == nil {
 		return nil
 	}
 
-	if tree.LeftChild == nil && tree.RightChild == nil {
+	if node.LeftChild == nil && node.RightChild == nil {
 		return nil
 	}
 
-	if tree.Data < x {
-		if tree.RightChild != nil {
-			if tree.RightChild.Data == x {
-				return tree
+	if node.Data < x {
+		if node.RightChild != nil {
+			if node.RightChild.Data == x {
+				return node
 			} else {
-				return tree.RightChild.findParent(x)
+				return findParent(x, node.RightChild)
 			}
 		}
 	} else {
-		if tree.LeftChild != nil {
-			if tree.LeftChild.Data == x {
-				return tree
+		if node.LeftChild != nil {
+			if node.LeftChild.Data == x {
+				return node
 			} else {
-				return tree.LeftChild.findParent(x)
+				return findParent(x, node.LeftChild)
 			}
 		}
 	}
@@ -98,84 +140,46 @@ func (tree *SplayTree) findParent(x int32) *SplayTree {
 	return nil
 }
 
-// maxNode finds the max node in a subtree
-// Runtime: O(lg n) worst case
-func (tree *SplayTree) maxNode() *SplayTree {
-	if tree == nil {
-		return nil
+func (tree *SplayTree) splay(node *Node) {
+	y := findParent(node.Data, tree.Root)
+	var z *Node = nil
+	if y != nil {
+		z = findParent(y.Data, tree.Root)
 	}
 
-	if tree.RightChild == nil {
-		return tree
-	}
+	// zig step: If y is the root, do one rotation on x to make it the root
+	if z == nil {
+		if y.LeftChild == node {
+			y.LeftChild = node.RightChild
+			node.RightChild = y
+		} else {
+			y.RightChild = node.LeftChild
+			node.LeftChild = y
+		}
 
-	return tree.RightChild.maxNode()
-}
-
-// Delete Deletes the node with x in the splay tree. If the node had a parent, then the parent is splayed to the .
-// root of the tree.
-// Runtime:
-func (tree *SplayTree) Delete(x int32) (int32, string) {
-	nodeToDelete := tree.Search(x)
-	err := ""
-	if nodeToDelete == nil || nodeToDelete.Data != x {
-		err = fmt.Sprintf("{x} is not in the splay tree")
-		return x, err
-	}
-
-	var leftSubtree, rightSubtree *SplayTree = nil, nil
-
-	// deleting the node x is in may create two subtrees of the children
-	// add pointers to these nodes, so they can be merged with the main tree afterward.
-	if nodeToDelete.LeftChild != nil {
-		leftSubtree = nodeToDelete.LeftChild
-	}
-
-	if nodeToDelete.RightChild != nil {
-		rightSubtree = nodeToDelete.RightChild
-	}
-
-	// disconnect the main tree from the node x is in
-	parent := tree.findParent(x)
-	if parent.LeftChild.Data == x {
-		parent.LeftChild = nil
-	} else {
-		parent.RightChild = nil
-	}
-
-	//TODO: find the max element in the left subtree and splay it to the top of that tree
-	maxNodeLeftSubtree := leftSubtree.maxNode()
-	maxNodeLeftSubtree.splay()
-
-	// connect the left and right subtrees, and then connect them to the main tree
-	leftSubtree.merge(rightSubtree)
-	parent.merge(leftSubtree)
-
-	// splay the parent node to the top
-	parent.splay()
-
-	return x, err
-}
-
-func (tree *SplayTree) merge(treeToMerge *SplayTree) {
-
-}
-
-func (tree *SplayTree) splay() {
-
-}
-
-func (tree *SplayTree) PrintTree() {
-	if tree == nil {
+		tree.Root = node
 		return
 	}
 
-	fmt.Println(tree.Data)
-	if tree.LeftChild != nil {
-		tree.LeftChild.PrintTree()
+	// zig-zig step
+	//if z.RightChild == y && y.RightChild == tree {
+	//
+	//}
+
+	// zig-zag step
+	return
+}
+
+func (tree *SplayTree) PrintTree() {
+	printTreeHelper(tree.Root)
+}
+
+func printTreeHelper(node *Node) {
+	if node == nil {
+		return
 	}
 
-	if tree.RightChild != nil {
-		tree.RightChild.PrintTree()
-	}
+	fmt.Println(node.Data)
+	printTreeHelper(node.LeftChild)
+	printTreeHelper(node.RightChild)
 }
