@@ -143,8 +143,13 @@ func findParent(x int32, node *Node) *Node {
 func (tree *SplayTree) splay(node *Node) {
 	y := findParent(node.Data, tree.Root)
 	var z *Node = nil
+	var w *Node = nil
 	if y != nil {
 		z = findParent(y.Data, tree.Root)
+	}
+
+	if z != nil {
+		w = findParent(z.Data, tree.Root)
 	}
 
 	// zig step: If y is the root, do one rotation on x to make it the root
@@ -156,7 +161,6 @@ func (tree *SplayTree) splay(node *Node) {
 
 	// zig-zig step: first rotate y and then rotate x
 	if (z.RightChild == y && y.RightChild == node) || (z.LeftChild == y && y.LeftChild == node) {
-		//TODO: Have to update parent pointers of z if z is not nil
 		rotate(y, z)
 		rotate(node, y)
 	} else { // zig-zag step: double rotate x
@@ -172,6 +176,14 @@ func (tree *SplayTree) splay(node *Node) {
 			z.RightChild = leftSubtree
 			node.LeftChild = z
 			y.LeftChild = rightSubtree
+		}
+	}
+
+	if w != nil {
+		if w.LeftChild == z {
+			w.LeftChild = node
+		} else {
+			w.RightChild = node
 		}
 	}
 

@@ -125,6 +125,16 @@ func TestSplayTree_Search_Zig_Zig_Medium_tree(t *testing.T) {
 	}
 }
 
+func TestSplayTree_Search_Zig_Zag_Medium_tree(t *testing.T) {
+	tree := intializeMediumTree()
+	tree.Search(2)
+	tree.PrintTree()
+	fmt.Println()
+	if tree.Root.Data != 2 {
+		t.Errorf("Tree root is %d, expected 2", tree.Root.Data)
+	}
+}
+
 func TestSplayTree_Insert_Zig(t *testing.T) {
 
 }
