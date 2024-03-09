@@ -91,6 +91,7 @@ func (tree *SplayTree) Insert(x int32) bool {
 
 	node.Data = x
 	insertHelper(tree.Root, node)
+	tree.splay(node)
 	return true
 }
 
@@ -142,12 +143,17 @@ func findParent(x int32, node *Node) *Node {
 
 func (tree *SplayTree) splay(node *Node) {
 	y := findParent(node.Data, tree.Root)
+	if y == nil {
+		return
+	}
+
 	var z *Node = nil
 	var w *Node = nil
 	if y != nil {
 		z = findParent(y.Data, tree.Root)
 	}
 
+	// may have to update z parent's pointer
 	if z != nil {
 		w = findParent(z.Data, tree.Root)
 	}
@@ -164,21 +170,10 @@ func (tree *SplayTree) splay(node *Node) {
 		rotate(y, z)
 		rotate(node, y)
 	} else { // zig-zag step: double rotate x
-		leftSubtree := node.LeftChild
-		rightSubtree := node.RightChild
-		if node.Data < z.Data {
-			node.LeftChild = z.LeftChild
-			z.LeftChild = rightSubtree
-			node.RightChild = z
-			y.RightChild = leftSubtree
-		} else {
-			node.RightChild = z.RightChild
-			z.RightChild = leftSubtree
-			node.LeftChild = z
-			y.LeftChild = rightSubtree
-		}
+		doubleRotate(node, y, z)
 	}
 
+	// update z parent's pointer after zig-zig or zig-zag step if the parent exists
 	if w != nil {
 		if w.LeftChild == z {
 			w.LeftChild = node
@@ -195,6 +190,7 @@ func (tree *SplayTree) splay(node *Node) {
 	tree.Root = node
 }
 
+// rotate single rotation on x and disperses subtrees of x's children to y
 func rotate(x *Node, y *Node) {
 	if y.LeftChild == x {
 		y.LeftChild = x.RightChild
@@ -205,7 +201,30 @@ func rotate(x *Node, y *Node) {
 	}
 }
 
+// doubleRotate used during the zig-zag step to do a double rotation on x and disperses the subtrees of x's children
+// to y and z
+func doubleRotate(x *Node, y *Node, z *Node) {
+	leftSubtree := x.LeftChild
+	rightSubtree := x.RightChild
+	if x.Data < z.Data {
+		x.LeftChild = z.LeftChild
+		z.LeftChild = rightSubtree
+		x.RightChild = z
+		y.RightChild = leftSubtree
+	} else {
+		x.RightChild = z.RightChild
+		z.RightChild = leftSubtree
+		x.LeftChild = z
+		y.LeftChild = rightSubtree
+	}
+}
+
+// PrintTree prints the splay tree in preorder
 func (tree *SplayTree) PrintTree() {
+	if tree == nil {
+		panic(NullPointerError)
+	}
+
 	printTreeHelper(tree.Root)
 }
 
