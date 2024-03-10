@@ -216,6 +216,7 @@ func doubleRotate(x *Node, y *Node, z *Node) {
 	}
 }
 
+// ToList converts the splay tree to a splice
 func (tree *SplayTree) ToList() []int32 {
 	if tree.Root == nil {
 		return nil
