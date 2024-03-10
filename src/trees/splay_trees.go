@@ -219,6 +219,63 @@ func doubleRotate(x *Node, y *Node, z *Node) {
 	}
 }
 
+func (tree *SplayTree) Delete(val int32) {
+	x := findNode(tree.Root, val)
+	parent := findParent(x.Data, tree.Root)
+
+	leftSubtree := new(SplayTree)
+	leftSubtree.Root = x.LeftChild
+	rightSubtree := new(SplayTree)
+	rightSubtree.Root = x.RightChild
+
+	//delete x
+	if parent.LeftChild == x {
+		parent.LeftChild = nil
+	} else {
+		parent.RightChild = nil
+	}
+	//setting x's children to nil
+	x.LeftChild, x.RightChild = nil, nil
+
+	leftMax := findMaxNode(leftSubtree.Root)
+	leftSubtree.splay(leftMax)
+	tree.splay(parent)
+
+	leftSubtree.Root.RightChild = rightSubtree.Root
+
+	if leftMax.Data < parent.Data {
+		parent.LeftChild = leftMax
+	} else {
+		parent.RightChild = leftMax
+	}
+
+	//ensuring GC
+	leftSubtree = nil
+	rightSubtree = nil
+}
+
+// finds the node holding the element to delete, and nil if the element is not in the tree
+func findNode(root *Node, val int32) *Node {
+	if root == nil {
+		return nil
+	}
+	if root.Data == val {
+		return root
+	} else if root.Data < val {
+		return findNode(root.RightChild, val)
+	} else {
+		return findNode(root.LeftChild, val)
+	}
+}
+
+// finds the largest element in a subtree
+func findMaxNode(root *Node) *Node {
+	for root.RightChild != nil {
+		root = root.RightChild
+	}
+	return root
+}
+
 // PrintTree prints the splay tree in preorder
 func (tree *SplayTree) PrintTree() {
 	if tree == nil {
