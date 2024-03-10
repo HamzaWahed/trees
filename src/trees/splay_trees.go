@@ -1,9 +1,5 @@
 package trees
 
-import (
-	"fmt"
-)
-
 type Node struct {
 	Data       int32
 	LeftChild  *Node
@@ -30,8 +26,8 @@ func NewSplayTree(x int32) *SplayTree {
 		panic(MemoryAllocationError)
 	}
 
-	tree.Size = 0
 	tree.Root.Data = x
+	tree.Size = 1
 	tree.Root.LeftChild = nil
 	tree.Root.RightChild = nil
 	return tree
@@ -91,6 +87,7 @@ func (tree *SplayTree) Insert(x int32) bool {
 
 	node.Data = x
 	insertHelper(tree.Root, node)
+	tree.Size++
 	tree.splay(node)
 	return true
 }
@@ -276,21 +273,29 @@ func findMaxNode(root *Node) *Node {
 	return root
 }
 
-// PrintTree prints the splay tree in preorder
-func (tree *SplayTree) PrintTree() {
-	if tree == nil {
-		panic(NullPointerError)
+// ToList converts the splay tree to a splice
+func (tree *SplayTree) ToList() []int32 {
+	if tree.Root == nil {
+		return nil
 	}
 
-	printTreeHelper(tree.Root)
-}
+	var values []int32
+	var node *Node
+	queue := make([]*Node, 0)
+	queue = append(queue, tree.Root)
 
-func printTreeHelper(node *Node) {
-	if node == nil {
-		return
+	for len(queue) != 0 {
+		node = queue[0]
+		queue = queue[1:]
+		values = append(values, node.Data)
+		if node.LeftChild != nil {
+			queue = append(queue, node.LeftChild)
+		}
+
+		if node.RightChild != nil {
+			queue = append(queue, node.RightChild)
+		}
 	}
 
-	fmt.Printf("%d ", node.Data)
-	printTreeHelper(node.LeftChild)
-	printTreeHelper(node.RightChild)
+	return values
 }
