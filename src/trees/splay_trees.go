@@ -1,5 +1,7 @@
 package trees
 
+import "fmt"
+
 type Node struct {
 	Data       int32
 	LeftChild  *Node
@@ -225,30 +227,34 @@ func (tree *SplayTree) Delete(val int32) {
 	rightSubtree := new(SplayTree)
 	rightSubtree.Root = x.RightChild
 
-	//delete x
-	if parent.LeftChild == x {
-		parent.LeftChild = nil
-	} else {
-		parent.RightChild = nil
+	//delete x and splay the tree on x's parent
+	if parent != nil {
+		if parent.LeftChild == x {
+			parent.LeftChild = nil
+		} else {
+			parent.RightChild = nil
+		}
 	}
-	//setting x's children to nil
-	x.LeftChild, x.RightChild = nil, nil
 
+	//splaying left subtree then attaching the right to it
 	leftMax := findMaxNode(leftSubtree.Root)
 	leftSubtree.splay(leftMax)
-	tree.splay(parent)
-
 	leftSubtree.Root.RightChild = rightSubtree.Root
 
-	if leftMax.Data < parent.Data {
-		parent.LeftChild = leftMax
-	} else {
-		parent.RightChild = leftMax
+	if parent != nil {
+		if leftMax.Data < parent.Data {
+			parent.LeftChild = leftMax
+		} else {
+			parent.RightChild = leftMax
+		}
 	}
+
+	tree.splay(parent)
 
 	//ensuring GC
 	leftSubtree = nil
 	rightSubtree = nil
+	x.LeftChild, x.RightChild = nil, nil
 }
 
 // finds the node holding the element to delete, and nil if the element is not in the tree
@@ -296,6 +302,31 @@ func (tree *SplayTree) ToList() []int32 {
 			queue = append(queue, node.RightChild)
 		}
 	}
-
 	return values
+}
+
+func (tree *SplayTree) BreadthFirstPrint() {
+	if tree == nil || tree.Root == nil {
+		panic(NullPointerError)
+	}
+
+	var queueCapacity int32 = 0
+	queue := make([]*Node, 0)
+
+	queue = append(queue, tree.Root)
+	queueCapacity++
+
+	for queueCapacity > 0 {
+		if queue[0].LeftChild != nil {
+			queue = append(queue, queue[0].LeftChild)
+			queueCapacity++
+		}
+		if queue[0].RightChild != nil {
+			queue = append(queue, queue[0].RightChild)
+			queueCapacity++
+		}
+		fmt.Println(queue[0].Data)
+		queue = queue[1:]
+		queueCapacity--
+	}
 }

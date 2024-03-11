@@ -16,6 +16,18 @@ func initializeSmallCompleteTree() (*SplayTree, int32) {
 	return tree, lastElement
 }
 
+func initializeSmallTree2() *SplayTree {
+	tree := NewSplayTree(10)
+	tree.Insert(5)
+	tree.Insert(15)
+	tree.Insert(3)
+	tree.Insert(8)
+	tree.Insert(12)
+	tree.Insert(20)
+	tree.Insert(1)
+	return tree
+}
+
 func initializeMediumTree() *SplayTree {
 	tree := NewSplayTree(10)
 	tree.Insert(5)
@@ -167,4 +179,15 @@ func TestSplayTree_TreeToList(t *testing.T) {
 	if values[6] != 3 {
 		t.Errorf("Expected 3, got %d", values[1])
 	}
+}
+
+func TestSplayTree_Delete_Small_1(t *testing.T) {
+	tree, _ := initializeSmallCompleteTree()
+	tree.BreadthFirstPrint()
+}
+
+func TestNewSplayTree_Delete_Small_2(t *testing.T) {
+	tree := initializeSmallTree2()
+	tree.Delete(12)
+	tree.BreadthFirstPrint()
 }
