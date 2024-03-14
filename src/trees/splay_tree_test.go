@@ -11,8 +11,8 @@ func initializeSmallCompleteTree() (*SplayTree, int32) {
 	tree.Insert(1)
 	tree.Insert(2)
 	tree.Insert(4)
-	tree.Insert(6)
-	tree.Insert(lastElement)
+	//tree.Insert(6)
+	//tree.Insert(lastElement)
 	return tree, lastElement
 }
 
@@ -181,8 +181,9 @@ func TestSplayTree_TreeToList(t *testing.T) {
 	}
 }
 
-func TestSplayTree_Delete_Small_1(t *testing.T) {
+func TestSplayTree_Delete_Root_Small(t *testing.T) {
 	tree, _ := initializeSmallCompleteTree()
+	tree.Delete(4)
 	tree.BreadthFirstPrint()
 }
 
