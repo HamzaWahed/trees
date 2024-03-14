@@ -1,7 +1,5 @@
 package trees
 
-import "fmt"
-
 const (
 	rightChild = iota
 	leftChild
@@ -214,42 +212,45 @@ func (tree *SplayTree) Delete(val int32) {
 	x := findNode(tree.Root, val)
 	parent := x.parent
 
-	leftSubtree := new(SplayTree)
-	leftSubtree.Root = x.LeftChild
-	leftSubtree.Root.parent = nil
-
+	//deleting all references to x, and dividing the tree into 3
 	rightSubtree := new(SplayTree)
 	rightSubtree.Root = x.RightChild
-	rightSubtree.Root.parent = nil
+	x.RightChild = nil
+	if rightSubtree.Root != nil {
+		rightSubtree.Root.parent = nil
+	}
 
-	//delete x and splay the tree on x's parent
+	leftSubtree := new(SplayTree)
+	leftSubtree.Root = x.LeftChild
+	x.LeftChild = nil
+	if leftSubtree.Root != nil {
+		leftSubtree.Root.parent = nil
+		leftSubtree.splay(leftSubtree.findMaxNode())
+		leftSubtree.Root.RightChild = rightSubtree.Root
+	} else {
+		leftSubtree = rightSubtree
+	}
+
 	if parent != nil {
 		if parent.LeftChild == x {
 			parent.LeftChild = nil
 		} else {
 			parent.RightChild = nil
 		}
-	}
+		x.parent = nil
+		tree.splay(parent)
 
-	//splaying left subtree then attaching the right to it
-	leftMax := findMaxNode(leftSubtree.Root)
-	leftSubtree.splay(leftMax)
-	leftSubtree.Root.RightChild = rightSubtree.Root
-
-	if parent != nil {
-		if leftMax.Data < parent.Data {
-			parent.LeftChild = leftMax
+		if parent.Data < leftSubtree.Root.Data {
+			parent.RightChild = leftSubtree.Root
 		} else {
-			parent.RightChild = leftMax
+			parent.LeftChild = leftSubtree.Root
 		}
+		tree.Root = parent
+	} else {
+		tree.Root = leftSubtree.Root
 	}
 
-	tree.splay(parent)
-
-	//ensuring GC
-	leftSubtree = nil
-	rightSubtree = nil
-	x.LeftChild, x.RightChild = nil, nil
+	tree.Size--
 }
 
 // finds the node holding the element to delete, and nil if the element is not in the tree
@@ -267,7 +268,12 @@ func findNode(root *Node, val int32) *Node {
 }
 
 // finds the largest element in a subtree
-func findMaxNode(root *Node) *Node {
+func (tree *SplayTree) findMaxNode() *Node {
+	var root = tree.Root
+	if root == nil {
+		panic("Calling max node on an empty tree")
+	}
+
 	for root.RightChild != nil {
 		root = root.RightChild
 	}
@@ -298,30 +304,4 @@ func (tree *SplayTree) ToList() []int32 {
 		}
 	}
 	return values
-}
-
-func (tree *SplayTree) BreadthFirstPrint() {
-	if tree == nil || tree.Root == nil {
-		panic(NullPointerError)
-	}
-
-	var queueCapacity int32 = 0
-	queue := make([]*Node, 0)
-
-	queue = append(queue, tree.Root)
-	queueCapacity++
-
-	for queueCapacity > 0 {
-		if queue[0].LeftChild != nil {
-			queue = append(queue, queue[0].LeftChild)
-			queueCapacity++
-		}
-		if queue[0].RightChild != nil {
-			queue = append(queue, queue[0].RightChild)
-			queueCapacity++
-		}
-		fmt.Println(queue[0].Data)
-		queue = queue[1:]
-		queueCapacity--
-	}
 }
