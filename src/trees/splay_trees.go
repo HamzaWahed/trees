@@ -1,11 +1,17 @@
 package trees
 
-import "fmt"
+const (
+	rightChild = iota
+	leftChild
+	parent
+	disconnected
+)
 
 type Node struct {
 	Data       int32
 	LeftChild  *Node
 	RightChild *Node
+	parent     *Node
 }
 
 type SplayTree struct {
@@ -32,6 +38,7 @@ func NewSplayTree(x int32) *SplayTree {
 	tree.Size = 1
 	tree.Root.LeftChild = nil
 	tree.Root.RightChild = nil
+	tree.Root.parent = nil
 	return tree
 }
 
@@ -98,63 +105,46 @@ func insertHelper(root *Node, node *Node) {
 	if root.Data > node.Data {
 		if root.LeftChild == nil {
 			root.LeftChild = node
+			node.parent = root
 		} else {
 			insertHelper(root.LeftChild, node)
 		}
 	} else {
 		if root.RightChild == nil {
 			root.RightChild = node
+			node.parent = root
 		} else {
 			insertHelper(root.RightChild, node)
 		}
 	}
 }
 
-func findParent(x int32, node *Node) *Node {
-	if node == nil {
-		return nil
+// Returns the relation between y and x
+func isChild(x *Node, y *Node) int {
+	if x == nil || y == nil {
+		panic("isChild Operation on Nil nodes")
 	}
 
-	if node.LeftChild == nil && node.RightChild == nil {
-		return nil
-	}
-
-	if node.Data < x {
-		if node.RightChild != nil {
-			if node.RightChild.Data == x {
-				return node
-			} else {
-				return findParent(x, node.RightChild)
-			}
-		}
+	if y.LeftChild == x {
+		return leftChild
+	} else if y.RightChild == x {
+		return rightChild
 	} else {
-		if node.LeftChild != nil {
-			if node.LeftChild.Data == x {
-				return node
-			} else {
-				return findParent(x, node.LeftChild)
-			}
-		}
+		return disconnected
 	}
-
-	return nil
 }
 
 func (tree *SplayTree) splay(node *Node) {
-	y := findParent(node.Data, tree.Root)
+
+	//checks if node is the root
+	y := node.parent
 	if y == nil {
 		return
 	}
 
 	var z *Node = nil
-	var w *Node = nil
 	if y != nil {
-		z = findParent(y.Data, tree.Root)
-	}
-
-	// may have to update z parent's pointer
-	if z != nil {
-		w = findParent(z.Data, tree.Root)
+		z = y.parent
 	}
 
 	// zig step: If y is the root, do one rotation on x to make it the root
@@ -172,15 +162,6 @@ func (tree *SplayTree) splay(node *Node) {
 		doubleRotate(node, y, z)
 	}
 
-	// update z parent's pointer after zig-zig or zig-zag step if the parent exists
-	if w != nil {
-		if w.LeftChild == z {
-			w.LeftChild = node
-		} else {
-			w.RightChild = node
-		}
-	}
-
 	// recurse if z is not the root of the tree, until node is the root
 	if tree.Root != z {
 		tree.splay(node)
@@ -191,70 +172,85 @@ func (tree *SplayTree) splay(node *Node) {
 
 // rotate single rotation on x and disperses subtrees of x's children to y
 func rotate(x *Node, y *Node) {
+
 	if y.LeftChild == x {
+		if x.RightChild != nil {
+			x.RightChild.parent = y
+		}
 		y.LeftChild = x.RightChild
 		x.RightChild = y
 	} else {
+		if x.LeftChild != nil {
+			x.LeftChild.parent = y
+		}
 		y.RightChild = x.LeftChild
 		x.LeftChild = y
 	}
+
+	if y.parent != nil {
+		var yPosition int = isChild(y, y.parent)
+
+		if yPosition == leftChild {
+			y.parent.LeftChild = x
+		} else if yPosition == rightChild {
+			y.parent.RightChild = x
+		}
+	}
+
+	x.parent = y.parent
+	y.parent = x
 }
 
 // doubleRotate used during the zig-zag step to do a double rotation on x and disperses the subtrees of x's children
 // to y and z
 func doubleRotate(x *Node, y *Node, z *Node) {
-	leftSubtree := x.LeftChild
-	rightSubtree := x.RightChild
-	if x.Data < z.Data {
-		x.LeftChild = z.LeftChild
-		z.LeftChild = rightSubtree
-		x.RightChild = z
-		y.RightChild = leftSubtree
-	} else {
-		x.RightChild = z.RightChild
-		z.RightChild = leftSubtree
-		x.LeftChild = z
-		y.LeftChild = rightSubtree
-	}
+	rotate(x, y)
+	rotate(x, z)
 }
 
 func (tree *SplayTree) Delete(val int32) {
 	x := findNode(tree.Root, val)
-	parent := findParent(x.Data, tree.Root)
+	parent := x.parent
+
+	//deleting all references to x, and dividing the tree into 3
+	rightSubtree := new(SplayTree)
+	rightSubtree.Root = x.RightChild
+	x.RightChild = nil
+	if rightSubtree.Root != nil {
+		rightSubtree.Root.parent = nil
+	}
 
 	leftSubtree := new(SplayTree)
 	leftSubtree.Root = x.LeftChild
-	rightSubtree := new(SplayTree)
-	rightSubtree.Root = x.RightChild
+	x.LeftChild = nil
+	if leftSubtree.Root != nil {
+		leftSubtree.Root.parent = nil
+		leftSubtree.splay(leftSubtree.findMaxNode())
+		leftSubtree.Root.RightChild = rightSubtree.Root
+	} else {
+		leftSubtree = rightSubtree
+	}
 
-	//delete x and splay the tree on x's parent
 	if parent != nil {
 		if parent.LeftChild == x {
 			parent.LeftChild = nil
 		} else {
 			parent.RightChild = nil
 		}
-	}
+		x.parent = nil
+		tree.splay(parent)
 
-	//splaying left subtree then attaching the right to it
-	leftMax := findMaxNode(leftSubtree.Root)
-	leftSubtree.splay(leftMax)
-	leftSubtree.Root.RightChild = rightSubtree.Root
-
-	if parent != nil {
-		if leftMax.Data < parent.Data {
-			parent.LeftChild = leftMax
+		if parent.Data < leftSubtree.Root.Data {
+			parent.RightChild = leftSubtree.Root
 		} else {
-			parent.RightChild = leftMax
+			parent.LeftChild = leftSubtree.Root
 		}
+		tree.Root = parent
+	} else {
+		tree.Root = leftSubtree.Root
 	}
 
-	tree.splay(parent)
-
-	//ensuring GC
-	leftSubtree = nil
-	rightSubtree = nil
-	x.LeftChild, x.RightChild = nil, nil
+	tree.Size--
 }
 
 // finds the node holding the element to delete, and nil if the element is not in the tree
@@ -272,7 +268,12 @@ func findNode(root *Node, val int32) *Node {
 }
 
 // finds the largest element in a subtree
-func findMaxNode(root *Node) *Node {
+func (tree *SplayTree) findMaxNode() *Node {
+	var root = tree.Root
+	if root == nil {
+		panic("Calling max node on an empty tree")
+	}
+
 	for root.RightChild != nil {
 		root = root.RightChild
 	}
@@ -303,30 +304,4 @@ func (tree *SplayTree) ToList() []int32 {
 		}
 	}
 	return values
-}
-
-func (tree *SplayTree) BreadthFirstPrint() {
-	if tree == nil || tree.Root == nil {
-		panic(NullPointerError)
-	}
-
-	var queueCapacity int32 = 0
-	queue := make([]*Node, 0)
-
-	queue = append(queue, tree.Root)
-	queueCapacity++
-
-	for queueCapacity > 0 {
-		if queue[0].LeftChild != nil {
-			queue = append(queue, queue[0].LeftChild)
-			queueCapacity++
-		}
-		if queue[0].RightChild != nil {
-			queue = append(queue, queue[0].RightChild)
-			queueCapacity++
-		}
-		fmt.Println(queue[0].Data)
-		queue = queue[1:]
-		queueCapacity--
-	}
 }
