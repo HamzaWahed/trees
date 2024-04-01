@@ -138,8 +138,12 @@ func (tree *VEB) emptyTreeInsert(x int) {
 func (tree *VEB) Insert(x int) {
 	if tree.Min == NULL {
 		tree.emptyTreeInsert(x)
-	} else if x < tree.Min {
-		x, tree.Min = tree.Min, x
+	} else {
+
+		if x < tree.Min {
+			x, tree.Min = tree.Min, x
+		}
+
 		if tree.UniverseSize > 2 {
 			clusterIndex := tree.high(x)
 			if tree.Cluster[clusterIndex].Min == NULL {

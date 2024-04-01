@@ -1,35 +1,23 @@
 package trees
 
-import (
-	"math"
-	"testing"
-)
+import "testing"
 
-func TestIndexing_high_low(t *testing.T) {
-	var u int = 128
-	var x int = 33
-	//var lower_sqrt = 8
-	//var upper_sqrt = 16
-	//var true_high int = 11
-	//var true_low int = 0
+func TestVEB_Insert_baseCase(t *testing.T) {
+	var tree = BuildVEB(2)
+	tree.Insert(0)
 
-	var h int = high(x, u)
-	var l int = low(x, u)
-
-	if h != 4 || l != 1 {
-		t.Errorf("Incorrect Indexing:\nHigh should be 4, you got %d\nLow should be 1 you got %d", h, l)
+	if tree.Min == NULL || tree.Max == NULL {
+		t.Errorf("bug in vEB insertion")
 	}
 }
 
-func TestIndexing_index(t *testing.T) {
-	var u int = 128
-	//var x int = 33
-	var h int = 4
-	var lower_sqrt int = 8
-	var l int = 1
+func TestBuildVEB_Insert_baseCase2(t *testing.T) {
+	var tree = BuildVEB(2)
+	tree.Insert(0)
+	tree.Insert(1)
 
-	if index(h, l, u) != h*lower_sqrt+l {
-		t.Errorf("The correct index should be 13 we got %d", int(math.Pow(2, math.Floor(math.Log(float64(u))/2))))
+	if tree.Min == tree.Max {
+		t.Errorf("bug in updating vEB's min and max in thw base case")
+		t.Errorf("Min was: %d\nMax was: %d", tree.Min, tree.Max)
 	}
-
 }
