@@ -138,8 +138,12 @@ func (tree *VEB) emptyTreeInsert(x int) {
 func (tree *VEB) Insert(x int) {
 	if tree.Min == NULL {
 		tree.emptyTreeInsert(x)
-	} else if x < tree.Min {
-		x, tree.Min = tree.Min, x
+	} else {
+
+		if x < tree.Min {
+			x, tree.Min = tree.Min, x
+		}
+
 		if tree.UniverseSize > 2 {
 			clusterIndex := tree.high(x)
 			if tree.Cluster[clusterIndex].Min == NULL {
@@ -152,6 +156,61 @@ func (tree *VEB) Insert(x int) {
 
 		if x > tree.Max {
 			tree.Max = x
+		}
+	}
+}
+
+func (tree *VEB) delete(x int) {
+	//if tree.Member(x) == false {
+	//	return
+	//}
+
+	if tree.Min == tree.Max {
+		tree.Min = NULL
+		tree.Max = NULL
+	} else if tree.UniverseSize == 2 {
+		if x == 0 {
+			tree.Min = 1
+		} else {
+			tree.Min = 0
+		}
+
+		tree.Max = tree.Min
+	} else {
+
+		//handling the special case where x is the min, here we replace x with the second-smallest element in the
+		// cluster, set Min to the new element then change Min to the new element's value (thus deleting x in the process)
+		if x == tree.Min {
+			var firstCluster int = tree.Summary.Minimum()
+			var offset = tree.Cluster[firstCluster].Min
+			x = tree.index(firstCluster, offset)
+			tree.Min = x
+		}
+
+		//deleting x from its cluster
+		tree.Cluster[tree.high(x)].delete(tree.low(x))
+
+		//checking if the cluster is now empty, here we check if min == NULL because if so then max would also be NUll and the cluster is empty
+		if tree.Cluster[tree.high(x)].Min == NULL {
+			tree.Summary.delete(tree.high(x))
+		}
+
+		//since we could've changed the value of x as mention above, we now need to check if x is the tree's max
+		if x == tree.Max {
+			var maxSummary int = tree.Summary.Max
+
+			// if tree only has a min
+			if maxSummary == NULL {
+				tree.Max = tree.Min
+			} else {
+				var offset int = tree.Cluster[maxSummary].Max
+				tree.Max = tree.index(maxSummary, offset)
+			}
+		}
+
+		if x == tree.Max {
+			var offset int = tree.Cluster[tree.high(x)].Max
+			tree.Max = tree.index(tree.high(x), offset)
 		}
 	}
 }
