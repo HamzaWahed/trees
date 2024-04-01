@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func initializeSmallCompleteTree() (*SplayTree, int32) {
+func initializeSmallCompleteTree() (*SplayTree, int) {
 	tree := NewSplayTree(3)
-	var lastElement int32 = 0
+	var lastElement int = 0
 	tree.Insert(5)
 	tree.Insert(1)
 	tree.Insert(2)
@@ -190,7 +190,7 @@ func TestSplayTree_Delete_Root(t *testing.T) {
 	tree.Insert(4)
 	tree.Delete(4)
 
-	var expect = []int32{3, 2, 5, 1}
+	var expect = []int{3, 2, 5, 1}
 
 	for i, v := range tree.ToList() {
 		if v != expect[i] || len(expect) != len(tree.ToList()) {
@@ -210,7 +210,7 @@ func TestSplayTree_Delete(t *testing.T) {
 	tree.Insert(8)
 	tree.Delete(17)
 
-	var expect = []int32{8, 3, 29, 27, 32}
+	var expect = []int{8, 3, 29, 27, 32}
 
 	for i, v := range tree.ToList() {
 		if v != expect[i] || len(expect) != len(tree.ToList()) {
@@ -225,7 +225,7 @@ func TestNewSplayTree_Delete_2(t *testing.T) {
 	fmt.Println(tree.ToList())
 	tree.Delete(12)
 
-	var expect []int32 = []int32{9, 7, 10, 6, 8, 20, 2, 15, 0, 3, 1, 5, 4}
+	var expect []int = []int{9, 7, 10, 6, 8, 20, 2, 15, 0, 3, 1, 5, 4}
 
 	for i, v := range tree.ToList() {
 		if v != expect[i] || len(expect) != len(tree.ToList()) {

@@ -8,7 +8,7 @@ const (
 )
 
 type Node struct {
-	Data       int32
+	Data       int
 	LeftChild  *Node
 	RightChild *Node
 	parent     *Node
@@ -16,14 +16,14 @@ type Node struct {
 
 type SplayTree struct {
 	Root *Node
-	Size int32
+	Size int
 }
 
 const NullPointerError string = "Cannot call search on a null splay tree pointer"
 const MemoryAllocationError string = "Could not allocate memory"
 
 // NewSplayTree Initializes a new splay tree node and returns a pointer to it.
-func NewSplayTree(x int32) *SplayTree {
+func NewSplayTree(x int) *SplayTree {
 	tree := new(SplayTree)
 	if tree == nil {
 		panic(MemoryAllocationError)
@@ -44,7 +44,7 @@ func NewSplayTree(x int32) *SplayTree {
 
 // Search Binary searches the splay tree for a node with x in its data field. Returns a pointer to the node or to the parent node
 // if the x is not in the splay tree. Splays the node to the top if it exists, otherwise splays the node where the search stops on.
-func (tree *SplayTree) Search(x int32) bool {
+func (tree *SplayTree) Search(x int) bool {
 	if tree == nil {
 		panic(NullPointerError)
 	}
@@ -58,7 +58,7 @@ func (tree *SplayTree) Search(x int32) bool {
 	return false
 }
 
-func searchHelper(x int32, node *Node) *Node {
+func searchHelper(x int, node *Node) *Node {
 	if node.Data == x {
 		return node
 	}
@@ -84,7 +84,7 @@ func searchHelper(x int32, node *Node) *Node {
 
 // Insert Creates a new splay tree node with x and inserts the node into the tree. Splays the node to the root of
 // the tree after insertion.
-func (tree *SplayTree) Insert(x int32) bool {
+func (tree *SplayTree) Insert(x int) bool {
 	if tree == nil {
 		panic(NullPointerError)
 	}
@@ -208,7 +208,7 @@ func doubleRotate(x *Node, y *Node, z *Node) {
 	rotate(x, z)
 }
 
-func (tree *SplayTree) Delete(val int32) {
+func (tree *SplayTree) Delete(val int) {
 	x := findNode(tree.Root, val)
 	parent := x.parent
 
@@ -254,7 +254,7 @@ func (tree *SplayTree) Delete(val int32) {
 }
 
 // finds the node holding the element to delete, and nil if the element is not in the tree
-func findNode(root *Node, val int32) *Node {
+func findNode(root *Node, val int) *Node {
 	if root == nil {
 		return nil
 	}
@@ -281,12 +281,12 @@ func (tree *SplayTree) findMaxNode() *Node {
 }
 
 // ToList converts the splay tree to a splice
-func (tree *SplayTree) ToList() []int32 {
+func (tree *SplayTree) ToList() []int {
 	if tree.Root == nil {
 		return nil
 	}
 
-	var values []int32
+	var values []int
 	var node *Node
 	queue := make([]*Node, 0)
 	queue = append(queue, tree.Root)
