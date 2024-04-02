@@ -6,7 +6,7 @@ RANGE_SMALL = 512
 RANGE_MEDIUM = 65536
 RANGE_LARGE = pow(2, 32)
 RANGE_HIGHEST = pow(2, 64)
-NUMBER_OF_REQUESTS = pow(2, 16)
+NUMBER_OF_REQUESTS = pow(2, 16) #at most, can be slightly less because of float to int round
 
 
 def uniform_distribution():
