@@ -12,7 +12,7 @@ func vEBUniverse16() *VEB {
 }
 
 func vEBUniverse512() *VEB {
-	var tree = BuildVEB(512)
+	var tree = BuildVEB(1024)
 	tree.Insert(14)
 	tree.Insert(11)
 	tree.Insert(105)
@@ -23,7 +23,7 @@ func vEBUniverse512() *VEB {
 	return tree
 }
 
-func TestVEB_Insert_baseCase(t *testing.T) {
+func BenchmarkTestVEB_Insert_baseCase(t *testing.B) {
 	var tree = BuildVEB(2)
 	tree.Insert(0)
 
