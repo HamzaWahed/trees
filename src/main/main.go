@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 	"trees/trees"
 )
@@ -14,8 +15,13 @@ const LARGE int = 4294967296
 const BECNHMARK_UNIFORM = "-u"
 const BECHMARK_MTF = "-m"
 const BENCHMARK_ALL = "-a"
+const NUMBER_OF_INPUT_FILES = 31
 
-func benchmark(size int, method string) {
+/*
+*
+function runs the input through both data structures and returns the times they took each. (splay, veb)
+*/
+func benchmark(size int, method string) (time.Duration, time.Duration) {
 	var current_range int = size
 	var file *os.File
 	var input []int = make([]int, NUMBER_OF_REQUESTS)
@@ -23,7 +29,7 @@ func benchmark(size int, method string) {
 	var err error
 
 	// reading in elem from the input files and saving them in an array
-	var path = string("../src/inputs/" + method)
+	var path = string("../src/" + method)
 	file, err = os.OpenFile(path, os.O_RDONLY, 0644)
 	if err != nil {
 		panic("couldn't read file, uniform/small.in")
@@ -57,11 +63,38 @@ func benchmark(size int, method string) {
 		vEM_time += time.Since(v_start)
 	}
 
-	fmt.Printf("Input Size: %d, Sampling Distribution: Uniform\n", current_range)
-	fmt.Printf("Splay: ")
-	fmt.Println(splay_time)
-	fmt.Printf("vEM: ")
-	fmt.Println(vEM_time)
+	//fmt.Printf("Input Size: %d, Sampling Distribution: Uniform\n", current_range)
+	//fmt.Printf("Splay: ")
+	//fmt.Println(splay_time)
+	//fmt.Printf("vEM: ")
+	//fmt.Println(vEM_time)
+	return splay_time, vEM_time
+}
+
+func benchmark_set(input_type string, input_size int, number_of_input_files int) [][]time.Duration {
+
+	var input_file string
+	switch input_size {
+	case SMALL:
+		input_file = "small.in."
+	case MEDIUM:
+		input_file = "medium.in."
+	case LARGE:
+		input_file = "large.in."
+	}
+	var path string = "inputs/" + input_type + "/" + input_file
+
+	// initializing the 2d slice
+	var result [][]time.Duration = make([][]time.Duration, number_of_input_files)
+	for i := range number_of_input_files {
+		result[i] = make([]time.Duration, 2)
+	}
+
+	for i := range number_of_input_files {
+		result[i][0], result[i][1] = benchmark(input_size, path+strconv.Itoa(i+1))
+	}
+
+	return result
 }
 
 func contains(args []string, target string) bool {
@@ -70,8 +103,20 @@ func contains(args []string, target string) bool {
 			return true
 		}
 	}
-
 	return false
+}
+
+func write_to_output(path string, array [][]time.Duration) {
+	var output, _ = os.OpenFile("output/"+path, os.O_CREATE|os.O_APPEND, 0644)
+
+	for i := 0; i < NUMBER_OF_INPUT_FILES; i++ {
+		_, err := output.WriteString(strconv.FormatInt(int64(array[i][0]), 10) + " " +
+			strconv.FormatInt(int64(array[i][1]), 10) + "\n")
+
+		if err != nil {
+			panic("error when writing to file")
+		}
+	}
 }
 
 func main() {
@@ -85,18 +130,18 @@ func main() {
 	fmt.Printf("Performing Searches...\n\n")
 
 	if contains(cmd_args, BENCHMARK_ALL) {
-		benchmark(SMALL, "uniform/small.in")
-		benchmark(MEDIUM, "uniform/medium.in")
-		fmt.Println()
-		benchmark(SMALL, "mtf_opt/small.in")
-		benchmark(MEDIUM, "mtf_opt/medium.in")
-		//add large but for now its too slow
+		write_to_output("uniform_small.out", benchmark_set("uniform", SMALL, NUMBER_OF_INPUT_FILES))
+		write_to_output("uniform_medium.out", benchmark_set("uniform", MEDIUM, NUMBER_OF_INPUT_FILES))
+
+		write_to_output("mtf_opt_small.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
+		write_to_output("mtf_opt_medium.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
+
 	} else if contains(cmd_args, BECHMARK_MTF) {
-		benchmark(SMALL, "mtf_opt/small.in")
-		benchmark(MEDIUM, "mtf_opt/medium.in")
+		write_to_output("uniform_small.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
+		write_to_output("uniform_medium.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
 	} else {
-		benchmark(SMALL, "uniform/small.in")
-		benchmark(MEDIUM, "uniform/medium.in")
+		write_to_output("mtf_opt_small.out", benchmark_set("uniform", SMALL, NUMBER_OF_INPUT_FILES))
+		write_to_output("mtf_opt_medium.out", benchmark_set("uniform", MEDIUM, NUMBER_OF_INPUT_FILES))
 	}
 
 }
