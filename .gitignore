@@ -2,3 +2,5 @@
 .idea
 src/inputs
 src/output
+.DS_Store
+src/.DS_Store
