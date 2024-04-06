@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -34,6 +35,7 @@ func benchmark(size int, method string) (time.Duration, time.Duration) {
 	if err != nil {
 		panic("couldn't read file, uniform/small.in")
 	}
+
 	for i := 0; i < NUMBER_OF_REQUESTS; i++ {
 		_, err := fmt.Fscanln(file, &cur)
 		if err != nil {
@@ -53,7 +55,6 @@ func benchmark(size int, method string) (time.Duration, time.Duration) {
 	var vEM_time time.Duration
 
 	for i := 0; i < current_range; i++ {
-
 		s_start := time.Now()
 		splay.Search(input[i])
 		splay_time += time.Since(s_start)
@@ -72,7 +73,6 @@ func benchmark(size int, method string) (time.Duration, time.Duration) {
 }
 
 func benchmark_set(input_type string, input_size int, number_of_input_files int) [][]time.Duration {
-
 	var input_file string
 	switch input_size {
 	case SMALL:
@@ -82,6 +82,7 @@ func benchmark_set(input_type string, input_size int, number_of_input_files int)
 	case LARGE:
 		input_file = "large.in."
 	}
+	
 	var path string = "inputs/" + input_type + "/" + input_file
 
 	// initializing the 2d slice
@@ -107,14 +108,15 @@ func contains(args []string, target string) bool {
 }
 
 func write_to_output(path string, array [][]time.Duration) {
-	var output, _ = os.OpenFile("output/"+path, os.O_CREATE|os.O_APPEND, 0644)
+	_ = os.Mkdir("output", 0750)
+	var output, _ = os.OpenFile("output/"+path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 
 	for i := 0; i < NUMBER_OF_INPUT_FILES; i++ {
 		_, err := output.WriteString(strconv.FormatInt(int64(array[i][0]), 10) + " " +
 			strconv.FormatInt(int64(array[i][1]), 10) + "\n")
 
 		if err != nil {
-			panic("error when writing to file")
+			log.Fatal(err)
 		}
 	}
 }
@@ -123,11 +125,11 @@ func main() {
 
 	var cmd_args []string = os.Args
 
-	if !(contains(cmd_args, BECNHMARK_UNIFORM) || contains(cmd_args, BECNHMARK_UNIFORM) || contains(cmd_args, BENCHMARK_ALL)) {
+	if !(contains(cmd_args, BECNHMARK_UNIFORM) || contains(cmd_args, BECHMARK_MTF) || contains(cmd_args, BENCHMARK_ALL)) {
 		panic("Invalid flag")
 	}
 
-	fmt.Printf("Performing Searches...\n\n")
+	fmt.Printf("Performing Searches...")
 
 	if contains(cmd_args, BENCHMARK_ALL) {
 		write_to_output("uniform_small.out", benchmark_set("uniform", SMALL, NUMBER_OF_INPUT_FILES))
@@ -136,12 +138,11 @@ func main() {
 		write_to_output("mtf_opt_small.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
 		write_to_output("mtf_opt_medium.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
 
-	} else if contains(cmd_args, BECHMARK_MTF) {
+	} else if contains(cmd_args, BECNHMARK_UNIFORM) {
 		write_to_output("uniform_small.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
 		write_to_output("uniform_medium.out", benchmark_set("mtf_opt", SMALL, NUMBER_OF_INPUT_FILES))
 	} else {
 		write_to_output("mtf_opt_small.out", benchmark_set("uniform", SMALL, NUMBER_OF_INPUT_FILES))
 		write_to_output("mtf_opt_medium.out", benchmark_set("uniform", MEDIUM, NUMBER_OF_INPUT_FILES))
 	}
-
 }
