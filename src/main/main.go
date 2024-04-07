@@ -99,7 +99,9 @@ func contains(args []string, target string) bool {
 }
 
 func write_to_output(path string, array [][]time.Duration) {
-	var output, _ = os.OpenFile("../src/output/"+path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	outputPath := fmt.Sprintf("../src/output/%s", path)
+	fmt.Printf("Output data to %s\n", outputPath)
+	var output, _ = os.OpenFile(outputPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 
 	for i := 0; i < NUMBER_OF_OUTPUTS; i++ {
 		_, err := output.WriteString(strconv.FormatInt(int64(array[i][0]), 10) + " " +
@@ -112,27 +114,29 @@ func write_to_output(path string, array [][]time.Duration) {
 }
 
 func main() {
+	var cmdArgs []string = os.Args
 
-	var cmd_args []string = os.Args
-
-	if !(contains(cmd_args, BECNHMARK_UNIFORM) || contains(cmd_args, BECHMARK_MTF) || contains(cmd_args, BENCHMARK_ALL)) {
+	if !(contains(cmdArgs, BECNHMARK_UNIFORM) || contains(cmdArgs, BECHMARK_MTF) || contains(cmdArgs, BENCHMARK_ALL)) {
 		panic("Invalid flag")
 	}
 
-	fmt.Printf("Performing Searches...")
+	fmt.Printf("Performing Searches...\n")
 
-	if contains(cmd_args, BENCHMARK_ALL) {
-		write_to_output("uniform", benchmark_set("uniform"))
-		write_to_output("uniform", benchmark_set("uniform"))
+	// create output directory if it does not exist
+	_ = os.Mkdir("output", 0750)
 
-		write_to_output("mtf_opt", benchmark_set("mtf_opt"))
-		write_to_output("mtf_opt", benchmark_set("mtf_opt"))
+	if contains(cmdArgs, BENCHMARK_ALL) {
+		write_to_output("uniform_small.out", benchmark_set("uniform"))
+		write_to_output("uniform_medium.out", benchmark_set("uniform"))
 
-	} else if contains(cmd_args, BECNHMARK_UNIFORM) {
-		write_to_output("uniform_small.out", benchmark_set("mtf_opt"))
-		write_to_output("uniform_medium.out", benchmark_set("mtf_opt"))
+		write_to_output("mtf_opt_small.out", benchmark_set("mtf_opt"))
+		write_to_output("mtf_opt_medium.out", benchmark_set("mtf_opt"))
+
+	} else if contains(cmdArgs, BECNHMARK_UNIFORM) {
+		write_to_output("uniform_small.out", benchmark_set("uniform"))
+		write_to_output("uniform_medium.out", benchmark_set("uniform"))
 	} else {
-		write_to_output("mtf_opt_small.out", benchmark_set("uniform"))
-		write_to_output("mtf_opt_medium.out", benchmark_set("uniform"))
+		write_to_output("mtf_opt_small.out", benchmark_set("mtf_opt"))
+		write_to_output("mtf_opt_medium.out", benchmark_set("mtf_opt"))
 	}
 }
