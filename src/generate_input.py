@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 
 rng = np.random.default_rng()
 REQUEST_RANGE = pow(2, 32)
@@ -26,5 +27,8 @@ def mtf_optimal(number_of_requests):
 
 
 if __name__ == '__main__':
+    # create input directories if they don't exist
+    Path("inputs/mtf_opt").mkdir(parents=True, exist_ok=True)
+    Path("inputs/uniform").mkdir(parents=True, exist_ok=True)
     mtf_optimal(1000)
     uniform_distribution(1000)
