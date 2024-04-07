@@ -106,7 +106,7 @@ func write_to_output(path string, array [][]time.Duration) {
 	for i := 0; i < NUMBER_OF_OUTPUTS; i++ {
 		if i == NUMBER_OF_OUTPUTS-1 {
 			_, err := output.WriteString(strconv.FormatInt(int64(array[i][0]), 10) + " " +
-				strconv.FormatInt(int64(array[i][1]), 10) + " " + strconv.FormatInt(int64(array[i][2]), 10))
+				strconv.FormatInt(int64(array[i][1].Nanoseconds()), 10) + " " + strconv.FormatInt(int64(array[i][2].Nanoseconds()), 10))
 
 			if err != nil {
 				log.Fatal(err)
@@ -116,7 +116,7 @@ func write_to_output(path string, array [][]time.Duration) {
 		}
 
 		_, err := output.WriteString(strconv.FormatInt(int64(array[i][0]), 10) + " " +
-			strconv.FormatInt(int64(array[i][1]), 10) + " " + strconv.FormatInt(int64(array[i][2]), 10) + "\n")
+			strconv.FormatInt(int64(array[i][1].Nanoseconds()), 10) + " " + strconv.FormatInt(int64(array[i][2].Nanoseconds()), 10) + "\n")
 
 		if err != nil {
 			log.Fatal(err)
