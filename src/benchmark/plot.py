@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import csv
 import sys
+from scipy.stats import ttest_ind
 
 def plot_graph(file_path: str) -> None:
     try:
@@ -8,7 +9,7 @@ def plot_graph(file_path: str) -> None:
     except:
         raise
 
-    input_values = []
+    input_values = []  
     vEB_runtimes = []
     splay_runtimes = []
 
@@ -27,6 +28,15 @@ def plot_graph(file_path: str) -> None:
     plt.title(file_path)
     plt.legend()
     plt.show()
+
+def stat_test(arr1, arr2, alpha):
+    ttest = ttest_ind(arr1, arr2, )
+    print(f'p-value: {ttest.pvalue}')
+
+    if ttest.pvalue < alpha:
+        print("null hypothesis is rejected")
+    else:
+        print("null hypothesis is not rejected")
 
 def main() -> None:
     if len(sys.argv) < 2:
