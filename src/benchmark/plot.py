@@ -3,15 +3,22 @@ import csv
 import sys
 
 def plot_graph(file_path: str) -> None:
-    reader = csv.reader(open(file_path), delimiter=" ")
+    try:
+        reader = csv.reader(open(file_path), delimiter=" ")
+    except:
+        raise
+
     input_values = []
     vEB_runtimes = []
     splay_runtimes = []
 
-    for row in reader:
-        input_values.append(int(row[0]))
-        splay_runtimes.append(int(row[1]))
-        vEB_runtimes.append(int(row[2]))
+    try:
+        for row in reader:
+            input_values.append(int(row[0]))
+            splay_runtimes.append(int(row[1]))
+            vEB_runtimes.append(int(row[2]))
+    except:
+        raise
 
     plt.plot(input_values, vEB_runtimes, label="Van Emde Boas")
     plt.plot(input_values, splay_runtimes, label="Splay Tree")
