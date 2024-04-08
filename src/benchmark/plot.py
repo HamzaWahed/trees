@@ -26,17 +26,18 @@ def plot_graph(file_path: str) -> None:
     plt.xlabel("Size of Tree")
     plt.ylabel("Runtime (ns)")
     plt.title(file_path)
+    plt.xscale("log", base=2)
     plt.legend()
     plt.show()
 
 def stat_test(arr1, arr2, alpha):
-    ttest = ttest_ind(arr1, arr2, )
+    ttest = ttest_ind(arr1, arr2)
     print(f'p-value: {ttest.pvalue}')
 
     if ttest.pvalue < alpha:
-        print("null hypothesis is rejected")
-    else:
         print("null hypothesis is not rejected")
+    else:
+        print("null hypothesis is rejected")
 
 def main() -> None:
     if len(sys.argv) < 2:

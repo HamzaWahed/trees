@@ -16,7 +16,7 @@ const BENCHMARK_ALL = "-a"
 
 const NUMBER_OF_REQUESTS int = 1000
 const NUMBER_OF_INPUT_FILES = 50
-const MAX_TREE_SIZE int = 16384
+const MAX_TREE_SIZE int = 1048576
 
 var NUMBER_OF_OUTPUTS = int(math.Log2(float64(MAX_TREE_SIZE))) * NUMBER_OF_INPUT_FILES
 
@@ -83,7 +83,7 @@ func benchmark_set(method string) [][]time.Duration {
 			result[index][1], result[index][2] = benchmark(i, method+"/"+strconv.FormatInt(int64(path), 10))
 			index++
 		}
-		fmt.Println("break")
+		fmt.Print(".")
 	}
 
 	return result
