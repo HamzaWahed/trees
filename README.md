@@ -31,5 +31,5 @@ py plot.py ../output/mtf_opt_medium.out
 ```
 
 ## T-Test
-The plot.py script also contains a scipy t-test function. To run it, simply call the stat_test function in the main
-function with the specified significance value.
+The plot.py script also contains a scipy t-test function. To run it, simply call the stat_test function in the plot
+function with the runtime arrays for Van Emde Boas and Splay trees along with the specified significance value.
