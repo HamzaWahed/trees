@@ -23,7 +23,7 @@ Run the main.go file from the main module to create the output. The output files
 The first, second and third columns are the tree size, splay tree runtime and Van Emde Boas tree runtime respectively.
 Go into the benchmark directory.
 ```
-cd src/benchmark/
+cd src/benchmark
 ```
 Run the python script plot.py with a specified output file to plot it. An example command is given below.
 ```
