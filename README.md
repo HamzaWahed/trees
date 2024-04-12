@@ -27,7 +27,7 @@ cd src/benchmark/
 ```
 Run the python script plot.py with a specified output file to plot it. An example command is given below.
 ```
-py plot.py ../output/mtf_opt_medium.out
+python plot.py ../output/mtf_opt_medium.out
 ```
 
 ## T-Test
