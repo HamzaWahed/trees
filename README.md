@@ -6,7 +6,7 @@ Create a virtual environment for Python 3.12 and download the python packages us
 ```
 pip install requirements.txt
 ```
-Setup [GoLand](https://www.jetbrains.com/go/?var=1) or any other ide from Jetbrains.
+Setup [GoLand](https://www.jetbrains.com/go/?var=1) from Jetbrains or any other IDE.
 
 ## Benchmarking
 
@@ -14,7 +14,7 @@ Run the command below to generate the input files.
 ```
 python generate_input.py
 ```
-Set the working directory to be the src directory and program arguments to be one of the following:
+Set the working directory of the IDE to be the src directory and program arguments to be one of the following:
 - -a for both uniform and move-to-front distribution
 - -u for uniform distribution
 - -m for move-to-front distribution
